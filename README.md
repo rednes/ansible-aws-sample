@@ -12,6 +12,10 @@ AnsibleでAWS環境とAmazon EC2にWordPress環境を構築するサンプルPla
 * EC2インスタンスの作成
 * EC2インスタンスにWordPress環境の構築
 
+## AWS Configuration Diagram
+
+![AWS構成図](https://qiita-image-store.s3.amazonaws.com/0/199081/dba96d3f-9bd4-9894-ea66-12b5e29e0a2c.png)
+
 
 ## Requirements
 - ansible 2.4 or later
