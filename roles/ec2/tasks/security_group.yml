@@ -1,0 +1,20 @@
+---
+- name: vpc_id取得
+  ec2_vpc_net_facts:
+    region: "{{ aws.common.region }}"
+    filters:
+      "tag:Name": "{{ aws.vpc.name }}"
+  register: vpc_net_fact
+  check_mode: no
+
+- name: security group作成
+  ec2_group:
+    name: "{{ aws.vpc.security_group.name }}"
+    description: "{{ aws.vpc.security_group.description }}"
+    tags:
+      Name: "{{ aws.vpc.security_group.name }}"
+    vpc_id: "{{ vpc_net_fact.vpcs[0].id }}"
+    region: "{{ aws.common.region }}"
+    purge_rules: "{{ aws.vpc.security_group.purge_rules|default(False) }}"
+    rules: "{{ aws.vpc.security_group.rules }}"
+  register: security_group

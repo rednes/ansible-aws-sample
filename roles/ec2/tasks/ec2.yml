@@ -1,0 +1,41 @@
+---
+- name: security group取得
+  ec2_group_facts:
+    region: "{{ aws.common.region }}"
+    filters:
+      "tag:Name": "{{ aws.vpc.security_group.name }}"
+  register: ec2_group_facts
+  check_mode: no
+
+- name: subnet取得
+  ec2_vpc_subnet_facts:
+    region: "{{ aws.common.region }}"
+    filters:
+      "tag:Name": "{{ aws.vpc.subnet.subnet1.tags.Name }}"
+  register: ec2_subnet_facts
+  check_mode: no
+
+- name: Provision a set of instance
+  ec2:
+    key_name: "{{ my_vars.ec2.key_name }}"
+    group_id: "{{ ec2_group_facts.security_groups[0].group_id }}"
+    vpc_subnet_id: "{{ ec2_subnet_facts.subnets[0].id }}"
+    assign_public_ip: yes
+    instance_type: "{{ aws.vpc.ec2.instance_type }}"
+    region: "{{ aws.common.region }}"
+    image: "{{ aws.vpc.ec2.image }}"
+    wait: yes
+    wait_timeout: 300
+    count_tag:
+      Name: "{{ aws.vpc.ec2.name }}"
+    exact_count: 1
+    instance_tags:
+      Name: "{{ aws.vpc.ec2.name }}"
+  register: ec2
+
+- name: wait for ssh 
+  wait_for:
+    host: '{{ item.public_ip }}'
+    port: 22
+    timeout: 300
+  with_items: '{{ ec2.tagged_instances }}'

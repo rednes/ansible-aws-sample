@@ -1,0 +1,42 @@
+---
+- name: VPC作成
+  ec2_vpc_net:
+    name: "{{ aws.vpc.name }}"
+    cidr_block: "{{ aws.vpc.cidr_block }}"
+    region: "{{ aws.common.region }}"
+    tags: "{{ aws.vpc.tags }}"
+    tenancy: default
+  register: vpc_net
+
+- name: Internet Gateway作成
+  ec2_vpc_igw:
+    region: "{{ aws.common.region }}"
+    vpc_id: "{{ vpc_net.vpc.id }}"
+    tags: "{{ aws.vpc.igw.tags }}"
+    state: present
+  register: vpc_igw
+
+- name: subnet作成
+  ec2_vpc_subnet:
+    region: "{{ aws.common.region }}"
+    state: present
+    vpc_id: "{{ vpc_net.vpc.id }}"
+    az: "{{ aws.common.region }}{{ item.value.zone }}"
+    cidr: "{{ item.value.cidr }}"
+    map_public: "{{ item.value.map_public|default(True) }}"
+    tags: "{{ item.value.tags }}"
+  with_dict: "{{ aws.vpc.subnet }}"
+  register: vpc_subnet
+
+- name: route table作成
+  ec2_vpc_route_table:
+    vpc_id: "{{ vpc_net.vpc.id }}"
+    region: "{{ aws.common.region }}"
+    tags: "{{ aws.vpc.route_table.tags }}"
+    subnets: "{{ vpc_subnet.results | map(attribute='subnet.id') | list }}"
+    routes:
+      - dest: 0.0.0.0/0
+        gateway_id: "{{ vpc_igw.gateway_id }}"
+      - dest: "{{ vpc_net.vpc.cidr_block }}"
+        gateway_id: local
+  register: route_table

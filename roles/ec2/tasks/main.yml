@@ -1,0 +1,4 @@
+---
+- include_tasks: vpc.yml
+- include_tasks: security_group.yml
+- include_tasks: ec2.yml

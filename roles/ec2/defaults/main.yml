@@ -1,0 +1,38 @@
+---
+aws:
+  common:
+    region: ap-northeast-1
+  vpc:
+    name: AnsibleVPC
+    cidr_block: 10.0.0.0/16
+    tags:
+      Name: AnsibleVPC
+    igw:
+      tags:
+        Name: AnsibleIGW
+    subnet:
+      subnet1:
+        tags:
+          Name: public-a
+        cidr: 10.0.1.0/24
+        zone: a
+    route_table:
+      tags:
+        Name: public-route-table
+    security_group:
+      name: AnsibleWeb
+      description: EC2 group
+      rules:
+        - proto: tcp
+          ports:
+            - 22
+          cidr_ip: 0.0.0.0/0
+        - proto: tcp
+          ports:
+            - 80
+            - 443
+          cidr_ip: 0.0.0.0/0
+    ec2:
+      name: WordPress
+      instance_type: t2.micro
+      image: ami-2a69be4c

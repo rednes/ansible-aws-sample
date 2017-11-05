@@ -1,0 +1,9 @@
+---
+yum_packages:
+  - name: php.x86_64
+  - name: php-mysql.x86_64
+  - name: php-gd.x86_64
+  - name: php-mbstring.x86_64
+  - name: mysql57.x86_64
+  - name: mysql57-server.x86_64
+  - name: MySQL-python27.x86_64

@@ -1,0 +1,46 @@
+---
+- name: Download and unarchive wordpress file
+  unarchive:
+    src: '{{ archive_url }}'
+    dest: '{{ install_path }}'
+    remote_src: yes
+
+- name: Create symbolic-link for apache
+  file:
+    src: '{{ install_path }}/wordpress'
+    dest: /var/www/html/wordpress
+    state: link
+
+- name: Change file ownership for apache
+  file:
+    path: '{{ install_path }}/wordpress'
+    owner: apache
+    group: apache
+    recurse: yes
+
+- name: Start services
+  service:
+    name: '{{ item.name }}'
+    enabled: '{{ item.enabled | default("yes") }}'
+    state: '{{ item.state | default("started") }}'
+  with_items:
+    - name: httpd
+    - name: mysqld
+
+- name: Create mysql-user for wordpress
+  mysql_user:
+    name: '{{ mysql_user.name }}'
+    password: '{{ mysql_user.password }}'
+    state: present
+
+- name: Create database for wordpress
+  mysql_db:
+    name: '{{ mysql_db.db_name }}'
+    state: present
+
+- name: Append-privs wordpress-user
+  mysql_user:
+    name: '{{ mysql_user.name }}'
+    append_privs: true
+    priv: '{{ mysql_db.db_name}}.*:ALL,GRANT'
+    state: present
