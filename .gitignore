@@ -1,3 +1,2 @@
-ansible.cfg
-group_vars/*
-!.gitempty
+aws01/*
+aws02/*
