@@ -1,0 +1,6 @@
+---
+my_vars:
+  ec2:
+    key_name: XXXX # AWSに登録したキーペア名を入力
+  rds:
+    endpoint: XXXX # RDSで作成したDBのエンドポイントを入力

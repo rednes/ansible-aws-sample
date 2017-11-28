@@ -1,0 +1,3 @@
+ansible.cfg
+host_vars/localhost.yml
+!.gitempty

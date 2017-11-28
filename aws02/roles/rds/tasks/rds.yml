@@ -1,0 +1,44 @@
+---
+- name: subnet取得
+  ec2_vpc_subnet_facts:
+    region: "{{ aws.common.region }}"
+    filters:
+      "tag:route": private
+  register: ec2_subnet_facts
+  check_mode: no
+
+- name: rds-subnet-group作成
+  rds_subnet_group:
+    name: "{{ aws.vpc.rds.subnet_group.name }}"
+    region: "{{ aws.common.region }}"
+    state: present
+    description: "{{ aws.vpc.rds.subnet_group.description }}"
+    subnets: "{{ ec2_subnet_facts.subnets | map(attribute='id') | list }}"
+  register: rds_subnet_group
+
+- name: security group取得
+  ec2_group_facts:
+    region: "{{ aws.common.region }}"
+    filters:
+      "tag:Name": "{{ aws.vpc.security_group.security_group2.name }}"
+  register: ec2_group_facts
+  check_mode: no
+
+- name: RDS作成
+  rds:
+    command: create
+    instance_name: "{{ aws.vpc.rds.db_name }}"
+    username: "{{ aws.vpc.rds.db_user }}"
+    password: "{{ aws.vpc.rds.db_password }}"
+    db_name: wordpress
+    region: "{{ aws.common.region }}"
+    subnet: "{{ aws.vpc.rds.subnet_group.name }}"
+    vpc_security_groups: "{{ ec2_group_facts.security_groups[0].group_id }}"
+    db_engine: "{{ aws.vpc.rds.db_engine }}"
+    engine_version: "{{ aws.vpc.rds.engine_version }}"
+    license_model: "{{ aws.vpc.rds.license_model }}"
+    instance_type: "{{ aws.vpc.rds.instance }}"
+    size: "{{ aws.vpc.rds.size }}"
+    tags:
+      Name: "{{ aws.vpc.rds.db_name }}"
+  register: rds

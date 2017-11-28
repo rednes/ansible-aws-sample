@@ -1,0 +1,74 @@
+---
+aws:
+  common:
+    region: ap-northeast-1
+  vpc:
+    name: AnsibleVPC
+    cidr_block: 10.0.0.0/16
+    tags:
+      Name: AnsibleVPC
+    igw:
+      tags:
+        Name: AnsibleIGW
+    subnet:
+      subnet1:
+        tags:
+          Name: public-a
+          route: public
+        cidr: 10.0.1.0/24
+        zone: a
+      subnet2:
+        tags:
+          Name: private-a
+          route: private
+        cidr: 10.0.2.0/24
+        map_public: False
+        zone: a
+      subnet3:
+        tags:
+          Name: private-c
+          route: private
+        cidr: 10.0.3.0/24
+        map_public: False
+        zone: c
+    route_table:
+      tags:
+        Name: public-route-table
+    security_group:
+      security_group1:
+        name: AnsibleWeb
+        description: EC2 group
+        rules:
+          - proto: tcp
+            ports:
+              - 22
+            cidr_ip: 0.0.0.0/0
+          - proto: tcp
+            ports:
+              - 80
+              - 443
+            cidr_ip: 0.0.0.0/0
+      security_group2:
+        name: AnsibleDB
+        description: EC2 group
+        rules:
+          - proto: tcp
+            ports:
+              - 3306
+            cidr_ip: 10.0.1.0/24
+    rds:
+      subnet_group:
+        name: wp-dbsubnet
+        description: WordPress DB Subnet
+      db_name: wordpressdb
+      db_user: root
+      db_password: password
+      db_engine: MySQL
+      engine_version: 5.6.37
+      license_model: general-public-license
+      instance: db.t2.micro
+      size: 20
+    ec2:
+      name: WordPress
+      instance_type: t2.micro
+      image: ami-2a69be4c
